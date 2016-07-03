@@ -49,9 +49,21 @@ pub struct Chip8 {
 
     // Finally, the Chip 8 has a HEX based keypad (0x0-0xF),
     // you can use an array to store the current state of the key.
+    // Keypad                   Keyboard
+    // +-+-+-+-+                +-+-+-+-+
+    // |1|2|3|C|                |1|2|3|4|
+    // +-+-+-+-+                +-+-+-+-+
+    // |4|5|6|D|    suggested   |Q|W|E|R|
+    // +-+-+-+-+       =>       +-+-+-+-+
+    // |7|8|9|E|                |A|S|D|F|
+    // +-+-+-+-+                +-+-+-+-+
+    // |A|0|B|F|                |Z|X|C|V|
+    // +-+-+-+-+                +-+-+-+-+
     pub key: [u8; 16],
 
     pub draw_flag: bool,
+
+    pub chip8_fontset: [u8; 80],
 }
 
 impl Chip8 {
@@ -65,12 +77,64 @@ impl Chip8 {
             key: [0; 16],
             opcode: 0,
             i: 0,
-            pc: 0x200,
+            pc: 0,
             delay_timer: 0,
             sound_timer: 0,
             sp: 0,
             draw_flag: false,
+            chip8_fontset: [
+                0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
+                0x20, 0x60, 0x20, 0x20, 0x70, // 1
+                0xF0, 0x10, 0xF0, 0x80, 0xF0, // 2
+                0xF0, 0x10, 0xF0, 0x10, 0xF0, // 3
+                0x90, 0x90, 0xF0, 0x10, 0x10, // 4
+                0xF0, 0x80, 0xF0, 0x10, 0xF0, // 5
+                0xF0, 0x80, 0xF0, 0x90, 0xF0, // 6
+                0xF0, 0x10, 0x20, 0x40, 0x40, // 7
+                0xF0, 0x90, 0xF0, 0x90, 0xF0, // 8
+                0xF0, 0x90, 0xF0, 0x10, 0xF0, // 9
+                0xF0, 0x90, 0xF0, 0x90, 0x90, // A
+                0xE0, 0x90, 0xE0, 0x90, 0xE0, // B
+                0xF0, 0x80, 0x80, 0x80, 0xF0, // C
+                0xE0, 0x90, 0x90, 0x90, 0xE0, // D
+                0xF0, 0x80, 0xF0, 0x80, 0xF0, // E
+                0xF0, 0x80, 0xF0, 0x80, 0x80  // F
+            ],
         }
+    }
+
+    pub fn initialize(&mut self, buffer: [u32]) {
+        self.pc     = 0x200;  // Program counter starts at 0x200
+        self.opcode = 0;      // Reset current opcode
+        self.i      = 0;      // Reset index register
+        self.sp     = 0;      // Reset stack pointer
+
+        // Clear display
+        self.gfx = [0; 64 * 32];
+        // Clear stack
+        self.stack = [0; 16];
+        // Clear registers V0-VF
+        self.v = [0; 16];
+        // Clear memory
+        self.memory = [0; 4096];
+
+        // Load fontset
+        for i in 0..80{
+            self.memory[i as usize] = self.chip8_fontset[i as usize];
+        }
+
+        // Load the program into memory
+        for i in 0..buffer.len() {
+            self.memory[(i + 512) as usize] = buffer[i as usize];
+        }
+
+        // Reset timers
+        self.delay_timer = 0;
+        self.sound_timer = 0;
+
+        // Other resets
+        self.key = [0; 16];
+        self.draw_flag = false;
     }
 
     pub fn emulate_cycle(&mut self) {
@@ -205,6 +269,29 @@ impl Chip8 {
                 self.draw_flag = true;
                 // Update the program counter to move to the next opcode
                 self.pc += 2;
+            }
+
+
+            0xE000=> {
+                // Every cycle you should check the key input state and store it in key[].
+                // It actually doesn’t matter what value you store,
+                // because opcode 0xEX9E and 0xEXA1 only check if a certain key is or isn’t pressed.
+                // Opcode 0xFX0A only waits for a key press, and when it receives one,
+                // it stores the key name in the register and not the key state.
+                match self.opcode & 0x00FF {
+                    // EX9E: Skips the next instruction
+                    // if the key stored in VX is pressed
+                    0x009E => {
+                        if self.key[self.v[((self.opcode & 0x0F00) >> 8) as usize] as usize] != 0 {
+                            self.pc += 4;
+                        }
+                        else {
+                            self.pc += 2;
+                        }
+                    }
+
+                    x => println!("ERROR: opcode 0x{:X} undefined.", x),
+                }
             }
 
             x => println!("ERROR: opcode 0x{:X} undefined.", x),
