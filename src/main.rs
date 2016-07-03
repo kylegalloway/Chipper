@@ -3,27 +3,26 @@ mod defs;
 
 
 fn main() {
-    let myChip8: defs::Chip8;
+    // Initialize the Chip8 system
+    let mut my_chip8 = defs::Chip8::new();
 
     // Set up render system and register input callbacks
     // setupGraphics();
     // setupInput();
 
-    // Initialize the Chip8 system and load the game into the memory
-    // myChip8.initialize();
-    // myChip8.loadGame("pong"); // TODO change to command line argument
+    // Load the game into the memory.
+    // my_chip8.loadGame("pong"); // TODO change to command line argument
 
     // Emulation loop
-    // for(;;)
-    // {
-    // Emulate one cycle
-    // myChip8.emulateCycle();
+    loop {
+        // Emulate one cycle
+        my_chip8.emulate_cycle();
 
-    // If the draw flag is set, update the screen
-    // if(myChip8.drawFlag)
-    //   drawGraphics();
+        // If the draw flag is set, update the screen
+        // if(my_chip8.drawFlag)
+        //   drawGraphics();
 
-    // Store key press state (Press and Release)
-    // myChip8.setKeys();
-    // }
+        // Store key press state (Press and Release)
+        // my_chip8.setKeys();
+    }
 }
