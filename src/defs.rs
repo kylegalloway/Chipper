@@ -50,6 +50,8 @@ pub struct Chip8 {
     // Finally, the Chip 8 has a HEX based keypad (0x0-0xF),
     // you can use an array to store the current state of the key.
     pub key: [u8; 16],
+
+    pub draw_flag: bool,
 }
 
 impl Chip8 {
@@ -67,6 +69,7 @@ impl Chip8 {
             delay_timer: 0,
             sound_timer: 0,
             sp: 0,
+            draw_flag: false,
         }
     }
 
@@ -80,11 +83,6 @@ impl Chip8 {
         // Decode Opcode
         match self.opcode & 0xF000 {
             // Execute Opcode
-            0xA000 => {
-                self.i = self.opcode & 0x0FFF;
-                self.pc += 2;
-            }
-
             0x0000 => {
                 match self.opcode & 0x000F {
                     0x0000 => {
@@ -101,6 +99,114 @@ impl Chip8 {
                     x => println!("ERROR: opcode 0x{:X} undefined.", x),
                 }
             }
+
+            0x0004 => {
+                // 0x8XY4: adds the value of VY to VX.
+                // Register VF is set to 1 when there is a carry and set to 0 when there isn’t.
+                // Because the register can only store values from 0 to 255 (8 bit value),
+                // it means that if the sum of VX and VY is larger than 255,
+                // it can’t be stored in the register (or actually it starts counting from 0 again).
+                // If the sum of VX and VY is larger than 255, we use the carry flag to let
+                // the system know that the total sum of both values was indeed larger than 255.
+                // Don’t forget to increment the program counter by two after executing the opcode.
+                if self.v[((self.opcode & 0x00F0) >> 4) as usize] >
+                   (0xFF - self.v[((self.opcode & 0x0F00) >> 8) as usize]) {
+                    self.v[0xF as usize] = 1; //carry
+                } else {
+                    self.v[0xF as usize] = 0;
+                }
+                self.v[((self.opcode & 0x0F00) >> 8) as usize] +=
+                    self.v[((self.opcode & 0x00F0) >> 4) as usize];
+                self.pc += 2;
+            }
+
+            0x0033 => {
+                // 0xFX33:
+                // Stores the Binary-coded decimal representation of VX
+                // at the addresses I, I plus 1, and I plus 2
+                let shifted_opcode = self.opcode & 0x0F00 >> 8;
+                let value = self.v[shifted_opcode as usize];
+                self.memory[self.i as usize] = value / 100;
+                self.memory[(self.i + 1) as usize] = (value / 10) % 10;
+                self.memory[(self.i + 2) as usize] = (value % 100) % 10;
+                self.pc += 2;
+            }
+
+            0x2000 => {
+                // 0x2NNN: calls the subroutine at address NNN.
+                // Because we will need to temporarily jump to address NNN,
+                // it means that we should store the current address of the pc in the stack.
+                // After storing the value of the program counter in the stack,
+                // increase the stack pointer to prevent overwriting the current stack.
+                // Now that we have stored the program counter, we can set it to the address NNN.
+                // Remember, because we’re calling a subroutine at a specific address,
+                // you should not increase the program counter by two.
+                self.stack[self.sp as usize] = self.pc;
+                self.sp += 1;
+                self.pc = self.opcode & 0x0FFF;
+            }
+
+            0xA000 => {
+                // ANNN: Sets the index register (i) to the address NNN
+                self.i = self.opcode & 0x0FFF;
+                self.pc += 2;
+            }
+
+            0xD000 => {
+                // 0xDXYN:
+                // Draws a sprite at coordinate (VX, VY) that has a width of 8 pixels and a height of N pixels.
+                // Each row of 8 pixels is read as bit-coded starting from memory location I;
+                // I value doesn’t change after the execution of this instruction.
+                // VF is set to 1 if any screen pixels are flipped from set to unset
+                // when the sprite is drawn, and to 0 if that doesn’t happen.
+                // The Chip 8 actually draws on the screen by drawing sprites.
+                // It will give us the location of where the sprite needs to be drawn
+                // (the opcode tells us which V register we need to check
+                // to fetch the X and Y coordinates) and the number of rows (N).
+                // The width of each sprite is fixed (8 bits / 1 byte).
+                // The state of each pixel is set by using a bitwise XOR operation.
+                // This means that it will compare the current pixel state with
+                // the current value in the memory.
+                // If the current value is different from the value in the memory,
+                // the bit value will be 1. If both values match, the bit value will be 0.
+
+
+                // Fetch the position and height of the sprite
+                let x: u16 = self.v[((self.opcode & 0x0F00) >> 8) as usize] as u16;
+                let y: u16 = self.v[((self.opcode & 0x00F0) >> 4) as usize] as u16;
+                let height: u16 = self.opcode & 0x000F as u16;
+                // Pixel value
+                let mut pixel: u16;
+
+                // Reset register VF
+                self.v[0xF as usize] = 0;
+                // Loop over each row
+                for yline in 0..height {
+                    // Fetch the pixel value from the memory starting at location I
+                    pixel = self.memory[(self.i + yline) as usize] as u16;
+                    // Loop over 8 bits of one row
+                    for xline in 0..8 {
+                        // Check if the current evaluated pixel is set to 1
+                        // (note that 0x80 >> xline scan through the byte, one bit at the time)
+                        if (pixel & (0x80 >> xline)) != 0 {
+                            // Check if the pixel on the display is set to 1.
+                            if self.gfx[(x + xline + ((y + yline) * 64)) as usize] == 1 {
+                                // If it is set, we need to register the collision by
+                                // setting the VF register
+                                self.v[0xF as usize] = 1;
+                            }
+                            // Set the pixel value by using XOR
+                            self.gfx[(x + xline + ((y + yline) * 64)) as usize] ^= 1;
+                        }
+                    }
+                }
+
+                // We changed our gfx[] array and thus need to update the screen.
+                self.draw_flag = true;
+                // Update the program counter to move to the next opcode
+                self.pc += 2;
+            }
+
             x => println!("ERROR: opcode 0x{:X} undefined.", x),
         }
 

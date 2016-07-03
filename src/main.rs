@@ -14,7 +14,7 @@ fn main() {
     // my_chip8.loadGame("pong"); // TODO change to command line argument
 
     // Emulation loop
-    loop {
+    'GameLoop: loop {
         // Emulate one cycle
         my_chip8.emulate_cycle();
 
