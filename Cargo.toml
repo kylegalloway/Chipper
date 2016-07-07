@@ -3,3 +3,6 @@
 name = "chipper"
 version = "0.0.1"
 authors = ["Kyle Galloway <kyle.galloway.1993@gmail.com>"]
+
+[dependencies]
+sdl = "0.3.6"
