@@ -114,6 +114,38 @@ impl Cpu {
             _ => not_implemented(self.opcode as usize, self.pc),
         }
     }
+
+    fn op_0xxx(&mut self) {}
+
+    fn op_1xxx(&mut self) {}
+
+    fn op_2xxx(&mut self) {}
+
+    fn op_3xxx(&mut self) {}
+
+    fn op_4xxx(&mut self) {}
+
+    fn op_5xxx(&mut self) {}
+
+    fn op_6xxx(&mut self) {}
+
+    fn op_7xxx(&mut self) {}
+
+    fn op_8xxx(&mut self) {}
+
+    fn op_9xxx(&mut self) {}
+
+    fn op_Axxx(&mut self) {}
+
+    fn op_Bxxx(&mut self) {}
+
+    fn op_Cxxx(&mut self) {}
+
+    fn op_Dxxx(&mut self) {}
+
+    fn op_Exxx(&mut self) {}
+
+    fn op_Fxxx(&mut self) {}
 }
 
 fn not_implemented(op: usize, pc: usize) {
