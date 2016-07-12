@@ -65,8 +65,11 @@ impl Cpu {
     pub fn load_game(&mut self, program: String) {
         let mut path = env::current_dir().unwrap();
         path.push(program.trim());
-        let mut reader = File::open(&path).unwrap();
-        // KG fixme: problem is here.
+        let display = path.display();
+        let mut reader = match File::open(&path) {
+            Err(why) => panic!("Couldn't open {}: {}", display, why),
+            Ok(reader) => reader,
+        };
         self.load_to_memory(&mut reader);
     }
 
