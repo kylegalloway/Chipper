@@ -24,12 +24,12 @@ fn main() {
         sdl::init(&[sdl::InitFlag::Video, sdl::InitFlag::Audio, sdl::InitFlag::Timer]);
 
         'main: loop {
-            'event : loop {
+            'event: loop {
                 match sdl::event::poll_event() {
-                    Event::Quit                  => break 'main,
-                    Event::None                  => break 'event,
+                    Event::Quit => break 'main,
+                    Event::None => break 'event,
                     Event::Key(key, state, _, _) => cpu.keypad.press(key, state),
-                    _                            => {}
+                    _ => {}
                 }
             }
 
@@ -38,8 +38,7 @@ fn main() {
         }
 
         sdl::quit();
-    }
-    else {
+    } else {
         println!("Please give the program name as the only command line argument.");
     }
 }

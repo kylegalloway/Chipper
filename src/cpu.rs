@@ -1,6 +1,7 @@
 use std::fs::File;
 use std::path::Path;
 use std::io::Read;
+use std::process;
 // use std::rand;
 use std::env;
 
@@ -18,7 +19,7 @@ pub struct Cpu {
     delay_timer: u8,
     sound_timer: u8,
     pub keypad: Keypad,
-    pub display: Display
+    pub display: Display,
 }
 
 impl Cpu {
@@ -34,7 +35,7 @@ impl Cpu {
             delay_timer: 0,
             sound_timer: 0,
             keypad: Keypad::new(),
-            display: Display::new()
+            display: Display::new(),
         };
 
         for i in 0..80 {
@@ -81,10 +82,10 @@ impl Cpu {
                         self.memory[self.pc] = value;
                         self.pc += 1;
                         self.load_to_memory(reader)
-                    },
-                    Err(e) => {panic!("{:?}", e)}
+                    }
+                    Err(e) => panic!("{:?}", e),
                 }
-            },
+            }
             None => self.pc = 0x200,
         };
     }
@@ -101,7 +102,7 @@ impl Cpu {
             // 0x3000 => self.op_3xxx(),
             // 0x4000 => self.op_4xxx(),
             // 0x5000 => self.op_5xxx(),
-            // 0x6000 => self.op_6xxx(),
+            0x6000 => self.op_6xxx(),
             // 0x7000 => self.op_7xxx(),
             // 0x8000 => self.op_8xxx(),
             // 0x9000 => self.op_9xxx(),
@@ -127,7 +128,11 @@ impl Cpu {
 
     fn op_5xxx(&mut self) {}
 
-    fn op_6xxx(&mut self) {}
+    // 6XNN: Sets VX to NN
+    fn op_6xxx(&mut self) {
+        self.v[self.op_x()] = self.op_nn();
+        self.pc += 2;
+    }
 
     fn op_7xxx(&mut self) {}
 
@@ -146,10 +151,34 @@ impl Cpu {
     fn op_Exxx(&mut self) {}
 
     fn op_Fxxx(&mut self) {}
+
+    // returns the x part of an opcode
+    fn op_x(&self) -> usize {
+        ((self.opcode & 0x0F00) >> 8) as usize
+    }
+    // returns the y part of an opcode
+    fn op_y(&self) -> usize {
+        ((self.opcode & 0x00F0) >> 4) as usize
+    }
+    // returns the n part of an opcode
+    fn op_n(&self) -> u8 {
+        (self.opcode & 0x000F) as u8
+    }
+    // returns the nn part of an opcode
+    fn op_nn(&self) -> u8 {
+        (self.opcode & 0x00FF) as u8
+    }
+    // returns the nnn part of an opcode
+    fn op_nnn(&self) -> u16 {
+        self.opcode & 0x0FFF
+    }
 }
 
 fn not_implemented(op: usize, pc: usize) {
-    println!("Not implemented:: op: {:x}, pc: {:x}", op, pc)
+    println!("**************************************************************");
+    println!("Not implemented:: op: {:x}, pc: {:x}", op, pc);
+    println!("**************************************************************");
+    process::exit(1);
 }
 
 static fontset: [u8; 80] =
