@@ -66,18 +66,24 @@ impl Cpu {
         let mut path = env::current_dir().unwrap();
         path.push(program.trim());
         let mut reader = File::open(&path).unwrap();
+        // KG fixme: problem is here.
         self.load_to_memory(&mut reader);
     }
 
     fn load_to_memory(&mut self, reader: &mut File) {
         match reader.bytes().next() {
-            Ok(value) => {
-                self.memory[self.pc] = value;
-                self.pc += 1;
-                self.load_to_memory(reader)
+            Some(value) => {
+                match value {
+                    Ok(value) => {
+                        self.memory[self.pc] = value;
+                        self.pc += 1;
+                        self.load_to_memory(reader)
+                    },
+                    Err(e) => {panic!("{:?}", e)}
+                }
             },
-            Err(_) => self.pc = 0x200,
-        }
+            None => self.pc = 0x200,
+        };
     }
 
     fn fetch_opcode(&mut self) {
