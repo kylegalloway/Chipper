@@ -8,5 +8,5 @@
 # More information here http://doc.crates.io/guide.html#cargotoml-vs-cargolock
 Cargo.lock
 
-# Remove backups
-/src/*.bk
+# Remove tags
+.tags
