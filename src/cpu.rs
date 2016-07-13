@@ -2,7 +2,7 @@ use std::fs::File;
 use std::path::Path;
 use std::io::Read;
 use std::process;
-// use std::rand;
+use rand;
 use std::env;
 
 use display::Display;
@@ -96,61 +96,147 @@ impl Cpu {
 
     fn opcode_execute(&mut self) {
         match (self.opcode & 0xf000) {
-            // 0x0000 => self.op_0xxx(),
-            // 0x1000 => self.op_1xxx(),
-            // 0x2000 => self.op_2xxx(),
-            // 0x3000 => self.op_3xxx(),
+            0x0000 => self.op_0xxx(),
+            0x1000 => self.op_1xxx(),
+            0x2000 => self.op_2xxx(),
+            0x3000 => self.op_3xxx(),
             // 0x4000 => self.op_4xxx(),
             // 0x5000 => self.op_5xxx(),
             0x6000 => self.op_6xxx(),
-            // 0x7000 => self.op_7xxx(),
+            0x7000 => self.op_7xxx(),
             // 0x8000 => self.op_8xxx(),
             // 0x9000 => self.op_9xxx(),
-            // 0xA000 => self.op_Axxx(),
+            0xA000 => self.op_Axxx(),
             // 0xB000 => self.op_Bxxx(),
-            // 0xC000 => self.op_Cxxx(),
-            // 0xD000 => self.op_Dxxx(),
-            // 0xE000 => self.op_Exxx(),
-            // 0xF000 => self.op_Fxxx(),
+            0xC000 => self.op_Cxxx(),
+            0xD000 => self.op_Dxxx(),
+            0xE000 => self.op_Exxx(),
+            0xF000 => self.op_Fxxx(),
             _ => not_implemented(self.opcode as usize, self.pc),
         }
     }
 
-    fn op_0xxx(&mut self) {}
+    fn op_0xxx(&mut self) {
+        match (self.opcode & 0x000F) {
+            0x0000 => {
+                self.display.clear();
+            }
+            0x000E => {
+                self.sp -= 1;
+                self.pc = self.stack[self.sp] as usize;
+            }
+            _ => not_implemented(self.opcode as usize, self.pc),
+        }
+        self.pc += 2;
+    }
 
-    fn op_1xxx(&mut self) {}
+    fn op_1xxx(&mut self) {
+        self.pc = self.op_nnn() as usize;
+    }
 
-    fn op_2xxx(&mut self) {}
+    fn op_2xxx(&mut self) {
+        self.stack[self.sp] = self.pc as u16;
+        self.sp += 1;
+        self.pc = self.op_nnn() as usize;
+    }
 
-    fn op_3xxx(&mut self) {}
+    fn op_3xxx(&mut self) {
+        if self.v[self.op_x()] == self.op_nn() {
+            self.pc += 4;
+        } else {
+            self.pc += 2;
+        }
+    }
 
     fn op_4xxx(&mut self) {}
 
     fn op_5xxx(&mut self) {}
 
-    // 6XNN: Sets VX to NN
     fn op_6xxx(&mut self) {
         self.v[self.op_x()] = self.op_nn();
         self.pc += 2;
     }
 
-    fn op_7xxx(&mut self) {}
+    fn op_7xxx(&mut self) {
+        self.v[self.op_x()] += self.op_nn();
+        self.pc += 2;
+    }
 
     fn op_8xxx(&mut self) {}
 
     fn op_9xxx(&mut self) {}
 
-    fn op_Axxx(&mut self) {}
+    fn op_Axxx(&mut self) {
+        self.i = self.op_nnn() as usize;
+        self.pc += 2;
+    }
 
     fn op_Bxxx(&mut self) {}
 
-    fn op_Cxxx(&mut self) {}
+    fn op_Cxxx(&mut self) {
+        self.v[self.op_x()] = self.op_nn() & rand::random::<u8>();
+        self.pc += 2;
+    }
 
-    fn op_Dxxx(&mut self) {}
+    fn op_Dxxx(&mut self) {
+        let x = self.v[self.op_x()];
+        let y = self.v[self.op_y()];
+        let n = self.op_n();
+        let from = self.i;
+        let to = from + n as usize;
+        self.v[15] = self.display.draw(x as usize, y as usize, &self.memory[from..to]);
+        self.pc += 2;
+    }
 
-    fn op_Exxx(&mut self) {}
+    fn op_Exxx(&mut self) {
+        let v = self.v[self.op_x()] as usize;
+        let skip = match (self.opcode & 0x00FF) {
+            0x9E => {
+                if self.keypad.pressed(v) {
+                    4
+                } else {
+                    2
+                }
+            }
+            0xA1 => {
+                if !self.keypad.pressed(v) {
+                    4
+                } else {
+                    2
+                }
+            }
+            _ => 2,
+        };
+        self.pc += skip;
+    }
 
-    fn op_Fxxx(&mut self) {}
+    fn op_Fxxx(&mut self) {
+        match (self.opcode & 0x00FF) {
+            0x07 => {
+                self.v[self.op_x()] = self.delay_timer;
+            }
+            0x15 => {
+                self.delay_timer = self.v[self.op_x()];
+            }
+            0x29 => {
+                self.i = self.v[self.op_x()] as usize * 5;
+            }
+            0x33 => {
+                self.memory[self.i] = self.v[self.op_x()] / 100;
+                self.memory[self.i + 1] = (self.v[self.op_x()] / 10) % 10;
+                self.memory[self.i + 2] = (self.v[self.op_x()] % 100) % 10;
+            }
+            0x65 => {
+                let x = self.op_x() + 1;
+                for index in 0..x {
+                    self.v[index] = self.memory[self.i + index];
+                }
+                self.i += x;
+            }
+            _ => not_implemented(self.opcode as usize, self.pc),
+        }
+        self.pc += 2;
+    }
 
     // returns the x part of an opcode
     fn op_x(&self) -> usize {

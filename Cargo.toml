@@ -6,3 +6,4 @@ authors = ["Kyle Galloway <kyle.galloway.1993@gmail.com>"]
 
 [dependencies]
 sdl = "0.3.6"
+rand = "0.3"

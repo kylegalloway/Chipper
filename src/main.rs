@@ -1,4 +1,5 @@
 extern crate sdl;
+extern crate rand;
 
 use cpu::Cpu;
 use std::env;
