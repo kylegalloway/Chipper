@@ -39,7 +39,7 @@ impl Cpu {
         };
 
         for i in 0..80 {
-            cpu.memory[i] = fontset[i];
+            cpu.memory[i] = FONTSET[i];
         }
         cpu
     }
@@ -100,11 +100,11 @@ impl Cpu {
             0x1000 => self.op_1xxx(),
             0x2000 => self.op_2xxx(),
             0x3000 => self.op_3xxx(),
-            // 0x4000 => self.op_4xxx(),
+            0x4000 => self.op_4xxx(),
             // 0x5000 => self.op_5xxx(),
             0x6000 => self.op_6xxx(),
             0x7000 => self.op_7xxx(),
-            // 0x8000 => self.op_8xxx(),
+            0x8000 => self.op_8xxx(),
             // 0x9000 => self.op_9xxx(),
             0xA000 => self.op_Axxx(),
             // 0xB000 => self.op_Bxxx(),
@@ -148,7 +148,13 @@ impl Cpu {
         }
     }
 
-    fn op_4xxx(&mut self) {}
+    fn op_4xxx(&mut self) {
+        if self.v[self.op_x()] != self.op_nn() {
+            self.pc += 4;
+        } else {
+            self.pc += 2;
+        }
+    }
 
     fn op_5xxx(&mut self) {}
 
@@ -162,7 +168,32 @@ impl Cpu {
         self.pc += 2;
     }
 
-    fn op_8xxx(&mut self) {}
+    fn op_8xxx(&mut self) {
+        match (self.opcode & 0x000F) {
+            0x0 => self.v[self.op_x()] = self.v[self.op_y()],
+            0x2 => {
+                self.v[self.op_x()] &= self.v[self.op_y()];
+            }
+            0x4 => {
+                self.v[self.op_x()] = self.v[self.op_x()].wrapping_add(self.v[self.op_y()]);
+                self.v[15] = if self.v[self.op_x()] < self.v[self.op_y()] {
+                    1
+                } else {
+                    0
+                };
+            }
+            0x5 => {
+                self.v[self.op_x()] = self.v[self.op_x()].wrapping_sub(self.v[self.op_y()]);
+                self.v[15] = if self.v[self.op_x()] > self.v[self.op_y()] {
+                    1
+                } else {
+                    0
+                };
+            }
+            _ => not_implemented(self.opcode as usize, self.pc),
+        }
+        self.pc += 2;
+    }
 
     fn op_9xxx(&mut self) {}
 
@@ -218,6 +249,9 @@ impl Cpu {
             0x15 => {
                 self.delay_timer = self.v[self.op_x()];
             }
+            0x18 => {
+                self.sound_timer = self.v[self.op_x()];
+            }
             0x29 => {
                 self.i = self.v[self.op_x()] as usize * 5;
             }
@@ -267,7 +301,7 @@ fn not_implemented(op: usize, pc: usize) {
     process::exit(1);
 }
 
-static fontset: [u8; 80] =
+static FONTSET: [u8; 80] =
     [0xF0, 0x90, 0x90, 0x90, 0xF0, 0x20, 0x60, 0x20, 0x20, 0x70, 0xF0, 0x10, 0xF0, 0x80, 0xF0,
      0xF0, 0x10, 0xF0, 0x10, 0xF0, 0x90, 0x90, 0xF0, 0x10, 0x10, 0xF0, 0x80, 0xF0, 0x10, 0xF0,
      0xF0, 0x80, 0xF0, 0x90, 0xF0, 0xF0, 0x10, 0x20, 0x40, 0x40, 0xF0, 0x90, 0xF0, 0x90, 0xF0,
