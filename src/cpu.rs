@@ -170,26 +170,31 @@ impl Cpu {
 
     fn op_8xxx(&mut self) {
         match (self.opcode & 0x000F) {
-            0x0 => self.v[self.op_x()] = self.v[self.op_y()],
+            0x0 => {
+                self.v[self.op_x()] = self.v[self.op_y()];
+            }
+            0x1 => {
+                self.v[self.op_x()] |= self.v[self.op_y()];
+            }
             0x2 => {
                 self.v[self.op_x()] &= self.v[self.op_y()];
             }
+            0x3 => {
+                self.v[self.op_x()] ^= self.v[self.op_y()];
+            }
             0x4 => {
-                self.v[self.op_x()] = self.v[self.op_x()].wrapping_add(self.v[self.op_y()]);
-                self.v[15] = if self.v[self.op_x()] < self.v[self.op_y()] {
-                    1
-                } else {
-                    0
-                };
+                let (result, overflow) = self.v[self.op_x()].overflowing_add(self.v[self.op_y()]);
+                self.v[self.op_x()] = result;
+                self.v[15] = overflow as u8;
             }
             0x5 => {
-                self.v[self.op_x()] = self.v[self.op_x()].wrapping_sub(self.v[self.op_y()]);
-                self.v[15] = if self.v[self.op_x()] > self.v[self.op_y()] {
-                    1
-                } else {
-                    0
-                };
+                let (result, overflow) = self.v[self.op_x()].overflowing_sub(self.v[self.op_y()]);
+                self.v[self.op_x()] = result;
+                self.v[15] = overflow as u8;
             }
+            // 0x6 => {}
+            // 0x7 => {}
+            // 0xE => {}
             _ => not_implemented(self.opcode as usize, self.pc),
         }
         self.pc += 2;
