@@ -58,7 +58,8 @@ impl Cpu {
             self.sound_timer -= 1;
         }
 
-        for _ in 0..10000 {
+        // Set to a higher number to make games slower.
+        for _ in 0..25000 {
         }
     }
 
