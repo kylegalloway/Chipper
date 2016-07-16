@@ -4,7 +4,6 @@ extern crate rand;
 use cpu::Cpu;
 use std::env;
 use sdl::event::Event;
-use std::io::{self, BufRead};
 
 mod cpu;
 mod display;
