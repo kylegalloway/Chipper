@@ -169,7 +169,7 @@ impl Cpu {
     }
 
     fn op_7xxx(&mut self) {
-        self.v[self.op_x()] += self.op_nn();
+        self.v[self.op_x()] = self.v[self.op_x()].wrapping_add(self.op_nn());
         self.pc += 2;
     }
 
