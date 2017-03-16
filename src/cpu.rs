@@ -59,8 +59,7 @@ impl Cpu {
         }
 
         // Set to a higher number to make games slower.
-        for _ in 0..25000 {
-        }
+        for _ in 0..25000 {}
     }
 
     pub fn load_game(&mut self, program: String) {
@@ -252,20 +251,8 @@ impl Cpu {
     fn op_exxx(&mut self) {
         let v = self.v[self.op_x()] as usize;
         let skip = match self.opcode & 0x00FF {
-            0x9E => {
-                if self.keypad.pressed(v) {
-                    4
-                } else {
-                    2
-                }
-            }
-            0xA1 => {
-                if !self.keypad.pressed(v) {
-                    4
-                } else {
-                    2
-                }
-            }
+            0x9E => if self.keypad.pressed(v) { 4 } else { 2 },
+            0xA1 => if !self.keypad.pressed(v) { 4 } else { 2 },
             _ => 2,
         };
         self.pc += skip;

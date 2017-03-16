@@ -19,7 +19,7 @@ impl Display {
                                           8,
                                           &[video::SurfaceFlag::HWSurface],
                                           &[video::VideoFlag::DoubleBuf])
-                .unwrap(),
+                    .unwrap(),
         }
     }
 
@@ -64,17 +64,13 @@ impl Display {
 
         for y in 0..32 {
             for x in 0..64 {
-                pixel = if self.gfx[y][x] != 0 {
-                    255
-                } else {
-                    0
-                };
+                pixel = if self.gfx[y][x] != 0 { 255 } else { 0 };
                 self.screen.fill_rect(Some(Rect {
-                                          x: pt(x),
-                                          y: pt(y),
-                                          w: sc,
-                                          h: sc,
-                                      }),
+                                               x: pt(x),
+                                               y: pt(y),
+                                               w: sc,
+                                               h: sc,
+                                           }),
                                       video::RGB(pixel, pixel, pixel));
             }
         }
