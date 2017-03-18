@@ -1,20 +1,26 @@
 use sdl::event::Key;
 
-pub struct Keypad {
+pub struct Keypad
+{
     keys: [bool; 16],
 }
 
-impl Keypad {
-    pub fn new() -> Keypad {
+impl Keypad
+{
+    pub fn new() -> Keypad
+    {
         Keypad { keys: [false; 16] }
     }
 
-    pub fn pressed(&mut self, index: usize) -> bool {
+    pub fn pressed(&mut self, index: usize) -> bool
+    {
         self.keys[index]
     }
 
-    pub fn press(&mut self, key: Key, state: bool) {
-        match key {
+    pub fn press(&mut self, key: Key, state: bool)
+    {
+        match key
+        {
             Key::Num1 => self.set_key(0x1, state),
             Key::Num2 => self.set_key(0x2, state),
             Key::Num3 => self.set_key(0x3, state),
@@ -35,7 +41,8 @@ impl Keypad {
         }
     }
 
-    fn set_key(&mut self, index: usize, state: bool) {
+    fn set_key(&mut self, index: usize, state: bool)
+    {
         self.keys[index] = state;
     }
 }

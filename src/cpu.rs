@@ -1,13 +1,13 @@
+use display::Display;
+use keypad::Keypad;
+use rand;
+use std::env;
 use std::fs::File;
 use std::io::Read;
 use std::process;
-use rand;
-use std::env;
 
-use display::Display;
-use keypad::Keypad;
-
-pub struct Cpu {
+pub struct Cpu
+{
     opcode: u16,
     memory: [u8; 4096],
     v: [u8; 16],
@@ -21,8 +21,10 @@ pub struct Cpu {
     pub display: Display,
 }
 
-impl Cpu {
-    pub fn new() -> Cpu {
+impl Cpu
+{
+    pub fn new() -> Cpu
+    {
         let mut cpu = Cpu {
             opcode: 0,
             memory: [0; 4096],
@@ -37,47 +39,60 @@ impl Cpu {
             display: Display::new(),
         };
 
-        for i in 0..80 {
+        for i in 0..80
+        {
             cpu.memory[i] = FONTSET[i];
         }
         cpu
     }
 
-    pub fn emulate_cycle(&mut self) {
+    pub fn emulate_cycle(&mut self)
+    {
         self.fetch_opcode();
         self.opcode_execute();
 
-        if self.delay_timer > 0 {
+        if self.delay_timer > 0
+        {
             self.delay_timer -= 1;
         }
 
-        if self.sound_timer > 0 {
-            if self.sound_timer == 1 {
+        if self.sound_timer > 0
+        {
+            if self.sound_timer == 1
+            {
                 println!("BEEP!\n");
             }
             self.sound_timer -= 1;
         }
 
         // Set to a higher number to make games slower.
-        for _ in 0..25000 {}
+        for _ in 0..25000
+        {}
     }
 
-    pub fn load_game(&mut self, program: String) {
+    pub fn load_game(&mut self, program: String)
+    {
         let mut path = env::current_dir().unwrap();
         path.push(program.trim());
         let display = path.display();
-        let mut reader = match File::open(&path) {
+        let mut reader = match File::open(&path)
+        {
             Err(why) => panic!("Couldn't open {}: {}", display, why),
             Ok(reader) => reader,
         };
         self.load_to_memory(&mut reader);
     }
 
-    fn load_to_memory(&mut self, reader: &mut File) {
-        match reader.bytes().next() {
-            Some(value) => {
-                match value {
-                    Ok(value) => {
+    fn load_to_memory(&mut self, reader: &mut File)
+    {
+        match reader.bytes().next()
+        {
+            Some(value) =>
+            {
+                match value
+                {
+                    Ok(value) =>
+                    {
                         self.memory[self.pc] = value;
                         self.pc += 1;
                         self.load_to_memory(reader)
@@ -89,12 +104,15 @@ impl Cpu {
         };
     }
 
-    fn fetch_opcode(&mut self) {
+    fn fetch_opcode(&mut self)
+    {
         self.opcode = (self.memory[self.pc] as u16) << 8 | (self.memory[self.pc + 1] as u16);
     }
 
-    fn opcode_execute(&mut self) {
-        match self.opcode & 0xf000 {
+    fn opcode_execute(&mut self)
+    {
+        match self.opcode & 0xf000
+        {
             0x0000 => self.op_0xxx(),
             0x1000 => self.op_1xxx(),
             0x2000 => self.op_2xxx(),
@@ -115,12 +133,16 @@ impl Cpu {
         }
     }
 
-    fn op_0xxx(&mut self) {
-        match self.opcode & 0x000F {
-            0x0000 => {
+    fn op_0xxx(&mut self)
+    {
+        match self.opcode & 0x000F
+        {
+            0x0000 =>
+            {
                 self.display.clear();
             }
-            0x000E => {
+            0x000E =>
+            {
                 self.sp -= 1;
                 self.pc = self.stack[self.sp] as usize;
             }
@@ -129,84 +151,111 @@ impl Cpu {
         self.pc += 2;
     }
 
-    fn op_1xxx(&mut self) {
+    fn op_1xxx(&mut self)
+    {
         self.pc = self.op_nnn() as usize;
     }
 
-    fn op_2xxx(&mut self) {
+    fn op_2xxx(&mut self)
+    {
         self.stack[self.sp] = self.pc as u16;
         self.sp += 1;
         self.pc = self.op_nnn() as usize;
     }
 
-    fn op_3xxx(&mut self) {
-        if self.v[self.op_x()] == self.op_nn() {
+    fn op_3xxx(&mut self)
+    {
+        if self.v[self.op_x()] == self.op_nn()
+        {
             self.pc += 4;
-        } else {
+        }
+        else
+        {
             self.pc += 2;
         }
     }
 
-    fn op_4xxx(&mut self) {
-        if self.v[self.op_x()] != self.op_nn() {
+    fn op_4xxx(&mut self)
+    {
+        if self.v[self.op_x()] != self.op_nn()
+        {
             self.pc += 4;
-        } else {
+        }
+        else
+        {
             self.pc += 2;
         }
     }
 
-    fn op_5xxx(&mut self) {
-        if self.v[self.op_x()] == self.v[self.op_y()] {
+    fn op_5xxx(&mut self)
+    {
+        if self.v[self.op_x()] == self.v[self.op_y()]
+        {
             self.pc += 4;
-        } else {
+        }
+        else
+        {
             self.pc += 2;
         }
     }
 
-    fn op_6xxx(&mut self) {
+    fn op_6xxx(&mut self)
+    {
         self.v[self.op_x()] = self.op_nn();
         self.pc += 2;
     }
 
-    fn op_7xxx(&mut self) {
+    fn op_7xxx(&mut self)
+    {
         self.v[self.op_x()] = self.v[self.op_x()].wrapping_add(self.op_nn());
         self.pc += 2;
     }
 
-    fn op_8xxx(&mut self) {
-        match self.opcode & 0x000F {
-            0x0 => {
+    fn op_8xxx(&mut self)
+    {
+        match self.opcode & 0x000F
+        {
+            0x0 =>
+            {
                 self.v[self.op_x()] = self.v[self.op_y()];
             }
-            0x1 => {
+            0x1 =>
+            {
                 self.v[self.op_x()] |= self.v[self.op_y()];
             }
-            0x2 => {
+            0x2 =>
+            {
                 self.v[self.op_x()] &= self.v[self.op_y()];
             }
-            0x3 => {
+            0x3 =>
+            {
                 self.v[self.op_x()] ^= self.v[self.op_y()];
             }
-            0x4 => {
+            0x4 =>
+            {
                 let (result, overflow) = self.v[self.op_x()].overflowing_add(self.v[self.op_y()]);
                 self.v[self.op_x()] = result;
                 self.v[15] = overflow as u8;
             }
-            0x5 => {
+            0x5 =>
+            {
                 let (result, overflow) = self.v[self.op_x()].overflowing_sub(self.v[self.op_y()]);
                 self.v[self.op_x()] = result;
                 self.v[15] = overflow as u8;
             }
-            0x6 => {
+            0x6 =>
+            {
                 self.v[15] = self.v[self.op_x()] & 0x1;
                 self.v[self.op_x()] >>= 1;
             }
-            0x7 => {
+            0x7 =>
+            {
                 let (result, overflow) = self.v[self.op_y()].overflowing_sub(self.v[self.op_x()]);
                 self.v[self.op_x()] = result;
                 self.v[15] = overflow as u8;
             }
-            0xE => {
+            0xE =>
+            {
                 self.v[15] = self.v[self.op_x()] >> 7;
                 self.v[self.op_x()] <<= 1;
             }
@@ -215,30 +264,38 @@ impl Cpu {
         self.pc += 2;
     }
 
-    fn op_9xxx(&mut self) {
-        if self.v[self.op_x()] != self.v[self.op_y()] {
+    fn op_9xxx(&mut self)
+    {
+        if self.v[self.op_x()] != self.v[self.op_y()]
+        {
             self.pc += 4;
-        } else {
+        }
+        else
+        {
             self.pc += 2;
         }
     }
 
 
-    fn op_axxx(&mut self) {
+    fn op_axxx(&mut self)
+    {
         self.i = self.op_nnn() as usize;
         self.pc += 2;
     }
 
-    fn op_bxxx(&mut self) {
+    fn op_bxxx(&mut self)
+    {
         self.pc = ((self.v[0] as u16) + self.op_nnn()) as usize;
     }
 
-    fn op_cxxx(&mut self) {
+    fn op_cxxx(&mut self)
+    {
         self.v[self.op_x()] = self.op_nn() & rand::random::<u8>();
         self.pc += 2;
     }
 
-    fn op_dxxx(&mut self) {
+    fn op_dxxx(&mut self)
+    {
         let x = self.v[self.op_x()];
         let y = self.v[self.op_y()];
         let n = self.op_n();
@@ -248,9 +305,11 @@ impl Cpu {
         self.pc += 2;
     }
 
-    fn op_exxx(&mut self) {
+    fn op_exxx(&mut self)
+    {
         let v = self.v[self.op_x()] as usize;
-        let skip = match self.opcode & 0x00FF {
+        let skip = match self.opcode & 0x00FF
+        {
             0x9E => if self.keypad.pressed(v) { 4 } else { 2 },
             0xA1 => if !self.keypad.pressed(v) { 4 } else { 2 },
             _ => 2,
@@ -258,39 +317,51 @@ impl Cpu {
         self.pc += skip;
     }
 
-    fn op_fxxx(&mut self) {
-        match self.opcode & 0x00FF {
-            0x07 => {
+    fn op_fxxx(&mut self)
+    {
+        match self.opcode & 0x00FF
+        {
+            0x07 =>
+            {
                 self.v[self.op_x()] = self.delay_timer;
             }
-            0x0A => {
+            0x0A =>
+            {
                 self.wait_for_keypress();
             }
-            0x15 => {
+            0x15 =>
+            {
                 self.delay_timer = self.v[self.op_x()];
             }
-            0x18 => {
+            0x18 =>
+            {
                 self.sound_timer = self.v[self.op_x()];
             }
             0x1E => self.i += self.v[self.op_x()] as usize,
-            0x29 => {
+            0x29 =>
+            {
                 self.i = self.v[self.op_x()] as usize * 5;
             }
-            0x33 => {
+            0x33 =>
+            {
                 self.memory[self.i] = self.v[self.op_x()] / 100;
                 self.memory[self.i + 1] = (self.v[self.op_x()] / 10) % 10;
                 self.memory[self.i + 2] = (self.v[self.op_x()] % 100) % 10;
             }
-            0x55 => {
+            0x55 =>
+            {
                 let end = self.op_x() + 1;
-                for x in 0..end {
+                for x in 0..end
+                {
                     self.memory[self.i + x] = self.v[x];
                 }
                 self.i += self.op_x() + 1;
             }
-            0x65 => {
+            0x65 =>
+            {
                 let x = self.op_x() + 1;
-                for index in 0..x {
+                for index in 0..x
+                {
                     self.v[index] = self.memory[self.i + index];
                 }
                 self.i += x;
@@ -301,31 +372,39 @@ impl Cpu {
     }
 
     // returns the x part of an opcode
-    fn op_x(&self) -> usize {
+    fn op_x(&self) -> usize
+    {
         ((self.opcode & 0x0F00) >> 8) as usize
     }
     // returns the y part of an opcode
-    fn op_y(&self) -> usize {
+    fn op_y(&self) -> usize
+    {
         ((self.opcode & 0x00F0) >> 4) as usize
     }
     // returns the n part of an opcode
-    fn op_n(&self) -> u8 {
+    fn op_n(&self) -> u8
+    {
         (self.opcode & 0x000F) as u8
     }
     // returns the nn part of an opcode
-    fn op_nn(&self) -> u8 {
+    fn op_nn(&self) -> u8
+    {
         (self.opcode & 0x00FF) as u8
     }
     // returns the nnn part of an opcode
-    fn op_nnn(&self) -> u16 {
+    fn op_nnn(&self) -> u16
+    {
         self.opcode & 0x0FFF
     }
 
     // Checks if any key is pressed. If none, it repeats.
     // When a key is pressed, it sets v[x] to that key.
-    fn wait_for_keypress(&mut self) {
-        for i in 0u8..16 {
-            if self.keypad.pressed(i as usize) {
+    fn wait_for_keypress(&mut self)
+    {
+        for i in 0u8..16
+        {
+            if self.keypad.pressed(i as usize)
+            {
                 self.v[self.op_x()] = i;
                 break;
             }
@@ -334,7 +413,8 @@ impl Cpu {
     }
 }
 
-fn not_implemented(op: usize, pc: usize) {
+fn not_implemented(op: usize, pc: usize)
+{
     println!("**************************************************************");
     println!("Not implemented:: op: {:x}, pc: {:x}", op, pc);
     println!("**************************************************************");
