@@ -69,12 +69,8 @@ impl Display
         {
             return;
         }
+
         let mut pixel: u8;
-        let sc = SCALE as u16;
-        fn pt(p: usize) -> i16
-        {
-            (p as i16) * (SCALE as i16)
-        }
 
         for y in 0..HEIGHT_BASE
         {
@@ -82,10 +78,10 @@ impl Display
             {
                 pixel = if self.gfx[y][x] != 0 { 255 } else { 0 };
                 self.screen.fill_rect(Some(Rect {
-                                               x: pt(x),
-                                               y: pt(y),
-                                               w: sc,
-                                               h: sc,
+                                               x: (x * SCALE) as i16,
+                                               y: (y * SCALE) as i16,
+                                               w: SCALE as u16,
+                                               h: SCALE as u16,
                                            }),
                                       video::RGB(pixel, pixel, pixel));
             }
