@@ -1,11 +1,13 @@
 use sdl::Rect;
 use sdl::video;
 
-const SCALE: isize = 20;
+const SCALE: usize = 20;
+const HEIGHT_BASE: usize = 32;
+const WIDTH_BASE: usize = 64;
 
 pub struct Display
 {
-    gfx: [[u8; 64]; 32],
+    gfx: [[u8; WIDTH_BASE]; HEIGHT_BASE],
     draw_flag: bool,
     screen: video::Surface,
 }
@@ -15,10 +17,10 @@ impl Display
     pub fn new() -> Display
     {
         Display {
-            gfx: [[0; 64]; 32],
+            gfx: [[0; WIDTH_BASE]; HEIGHT_BASE],
             draw_flag: true,
-            screen: video::set_video_mode(64 * SCALE,
-                                          32 * SCALE,
+            screen: video::set_video_mode((WIDTH_BASE * SCALE) as isize,
+                                          (HEIGHT_BASE * SCALE) as isize,
                                           8,
                                           &[video::SurfaceFlag::HWSurface],
                                           &[video::VideoFlag::DoubleBuf])
@@ -28,7 +30,7 @@ impl Display
 
     pub fn clear(&mut self)
     {
-        self.gfx = [[0; 64]; 32];
+        self.gfx = [[0; WIDTH_BASE]; HEIGHT_BASE];
         self.draw_flag = true;
     }
 
@@ -43,8 +45,8 @@ impl Display
         {
             for i in 0..8
             {
-                yj = (y + j) % 32;
-                xi = (x + i) % 64;
+                yj = (y + j) % HEIGHT_BASE;
+                xi = (x + i) % WIDTH_BASE;
 
                 if (sprite[j] & (0x80 >> i)) != 0
                 {
@@ -74,9 +76,9 @@ impl Display
             (p as i16) * (SCALE as i16)
         }
 
-        for y in 0..32
+        for y in 0..HEIGHT_BASE
         {
-            for x in 0..64
+            for x in 0..WIDTH_BASE
             {
                 pixel = if self.gfx[y][x] != 0 { 255 } else { 0 };
                 self.screen.fill_rect(Some(Rect {
