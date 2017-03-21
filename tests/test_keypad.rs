@@ -1,10 +1,10 @@
 //! Tests for keypad
 
 extern crate chipper;
-extern crate sdl;
+extern crate sdl2;
 
 use chipper::keypad::Keypad;
-use sdl::event::Key;
+use sdl2::keyboard::Keycode as Key;
 
 #[test]
 fn test_pressing_keys()

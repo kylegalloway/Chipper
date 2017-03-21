@@ -1,4 +1,4 @@
-use sdl::event::Key;
+use sdl2::keyboard::Keycode as Key;
 
 #[derive(Default, Builder, Debug)]
 pub struct Keypad

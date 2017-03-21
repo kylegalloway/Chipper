@@ -5,7 +5,7 @@ version = "0.1.0"
 authors = ["Kyle Galloway <kyle.galloway.1993@gmail.com>"]
 
 [dependencies]
-sdl = "~0.3.6"
+sdl2 = "~0.29.0"
 rand = "~0.3"
 derive_builder = "~0.3.0"
 clap = "~2.21.2"

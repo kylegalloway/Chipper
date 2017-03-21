@@ -1,11 +1,12 @@
 use display::Display;
 use keypad::Keypad;
 use rand;
+use sdl2::render::Renderer;
 use std::{env, process, thread, time};
 use std::fs::File;
 use std::io::Read;
 
-pub struct Cpu
+pub struct Cpu<'a>
 {
     opcode: u16,
     memory: [u8; 4096],
@@ -17,12 +18,12 @@ pub struct Cpu
     delay_timer: u8,
     sound_timer: u8,
     pub keypad: Keypad,
-    pub display: Display,
+    pub display: Display<'a>,
 }
 
-impl Cpu
+impl<'a> Cpu<'a>
 {
-    pub fn new() -> Cpu
+    pub fn new(renderer: &mut Renderer) -> Cpu<'a>
     {
         let mut cpu = Cpu {
             opcode: 0,
@@ -35,7 +36,7 @@ impl Cpu
             delay_timer: 0,
             sound_timer: 0,
             keypad: Keypad::default(),
-            display: Display::new(),
+            display: Display::new(renderer),
         };
 
         for i in 0..80
