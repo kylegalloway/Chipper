@@ -1,10 +1,9 @@
 use display::Display;
 use keypad::Keypad;
 use rand;
-use std::env;
+use std::{env, process, thread, time};
 use std::fs::File;
 use std::io::Read;
-use std::process;
 
 pub struct Cpu
 {
@@ -35,7 +34,7 @@ impl Cpu
             sp: 0,
             delay_timer: 0,
             sound_timer: 0,
-            keypad: Keypad::new(),
+            keypad: Keypad::default(),
             display: Display::new(),
         };
 
@@ -60,14 +59,13 @@ impl Cpu
         {
             if self.sound_timer == 1
             {
-                println!("BEEP!\n");
+                println!("BEEP!");
             }
             self.sound_timer -= 1;
         }
 
         // Set to a higher number to make games slower.
-        for _ in 0..25000
-        {}
+        thread::sleep(time::Duration::from_millis(1));
     }
 
     pub fn load_game(&mut self, program: String)

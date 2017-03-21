@@ -1,14 +1,14 @@
 use sdl::Rect;
 use sdl::video;
 
+static SCALE: isize = 20;
+
 pub struct Display
 {
     gfx: [[u8; 64]; 32],
     draw_flag: bool,
     screen: video::Surface,
 }
-
-static SCALE: isize = 20;
 
 impl Display
 {

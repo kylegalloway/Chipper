@@ -1,5 +1,6 @@
 use sdl::event::Key;
 
+#[derive(Default, Builder, Debug)]
 pub struct Keypad
 {
     keys: [bool; 16],
@@ -7,11 +8,6 @@ pub struct Keypad
 
 impl Keypad
 {
-    pub fn new() -> Keypad
-    {
-        Keypad { keys: [false; 16] }
-    }
-
     pub fn pressed(&mut self, index: usize) -> bool
     {
         self.keys[index]
