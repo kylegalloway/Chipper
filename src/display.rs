@@ -1,7 +1,7 @@
 use sdl::Rect;
 use sdl::video;
 
-static SCALE: isize = 20;
+const SCALE: isize = 20;
 
 pub struct Display
 {
