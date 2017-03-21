@@ -75,7 +75,11 @@ impl Cpu
         let display = path.display();
         let mut reader = match File::open(&path)
         {
-            Err(why) => panic!("Couldn't open {}: {}", display, why),
+            Err(e) =>
+            {
+                println!("Couldn't open {}: {}", display, e);
+                process::exit(1);
+            }
             Ok(reader) => reader,
         };
         self.load_to_memory(&mut reader);
@@ -95,7 +99,11 @@ impl Cpu
                         self.pc += 1;
                         self.load_to_memory(reader)
                     }
-                    Err(e) => panic!("{:?}", e),
+                    Err(e) =>
+                    {
+                        println!("{:?}", e);
+                        process::exit(1);
+                    }
                 }
             }
             None => self.pc = 0x200,

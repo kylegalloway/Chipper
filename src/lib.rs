@@ -29,8 +29,6 @@ pub fn main()
                  .long("file"))
         .get_matches();
 
-    // println!("Using input file: {}", args.value_of("file").unwrap());
-
     let program = format!("programs/{}", args.value_of("file").unwrap());
 
     cpu.load_game(program);
