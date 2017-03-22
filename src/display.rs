@@ -6,16 +6,16 @@ const SCALE: usize = 20;
 const HEIGHT_BASE: usize = 32;
 const WIDTH_BASE: usize = 64;
 
-pub struct Display<'a>
+pub struct Display<'r, 'a: 'r>
 {
     gfx: [[u8; WIDTH_BASE]; HEIGHT_BASE],
     draw_flag: bool,
-    screen: &'a mut Renderer<'a>,
+    screen: &'r mut Renderer<'a>,
 }
 
-impl<'a> Display<'a>
+impl<'r, 'a: 'r> Display<'r, 'a>
 {
-    pub fn new(renderer: &mut Renderer) -> Display<'a>
+    pub fn new(renderer: &'r mut Renderer<'a>) -> Display<'r, 'a>
     {
         Display {
             gfx: [[0; WIDTH_BASE]; HEIGHT_BASE],

@@ -6,7 +6,7 @@ use std::{env, process, thread, time};
 use std::fs::File;
 use std::io::Read;
 
-pub struct Cpu<'a>
+pub struct Cpu<'r, 'a: 'r>
 {
     opcode: u16,
     memory: [u8; 4096],
@@ -18,12 +18,12 @@ pub struct Cpu<'a>
     delay_timer: u8,
     sound_timer: u8,
     pub keypad: Keypad,
-    pub display: Display<'a>,
+    pub display: Display<'r, 'a>,
 }
 
-impl<'a> Cpu<'a>
+impl<'r, 'a: 'r> Cpu<'r, 'a>
 {
-    pub fn new(renderer: &mut Renderer) -> Cpu<'a>
+    pub fn new(renderer: &'r mut Renderer<'a>) -> Cpu<'r, 'a>
     {
         let mut cpu = Cpu {
             opcode: 0,
