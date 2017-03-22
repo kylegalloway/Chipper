@@ -1,21 +1,22 @@
 use sdl2::pixels::Color;
 use sdl2::rect::Rect;
 use sdl2::render::Renderer;
+use std::process;
 
 const SCALE: usize = 20;
 const HEIGHT_BASE: usize = 32;
 const WIDTH_BASE: usize = 64;
 
-pub struct Display<'r, 'a: 'r>
+pub struct Display<'a>
 {
     gfx: [[u8; WIDTH_BASE]; HEIGHT_BASE],
     draw_flag: bool,
-    screen: &'r mut Renderer<'a>,
+    screen: Renderer<'a>,
 }
 
-impl<'r, 'a: 'r> Display<'r, 'a>
+impl<'a> Display<'a>
 {
-    pub fn new(renderer: &'r mut Renderer<'a>) -> Display<'r, 'a>
+    pub fn new(renderer: Renderer<'a>) -> Display<'a>
     {
         Display {
             gfx: [[0; WIDTH_BASE]; HEIGHT_BASE],
@@ -74,10 +75,21 @@ impl<'r, 'a: 'r> Display<'r, 'a>
             {
                 pixel = if self.gfx[y][x] != 0 { 255 } else { 0 };
                 self.screen.set_draw_color(Color::RGB(pixel, pixel, pixel));
-                self.screen.fill_rect(Rect::new((x * SCALE) as i32,
-                                                (y * SCALE) as i32,
-                                                SCALE as u32,
-                                                SCALE as u32));
+                let value = self.screen.fill_rect(Some(Rect::new((x * SCALE) as i32,
+                                                                 (y * SCALE) as i32,
+                                                                 SCALE as u32,
+                                                                 SCALE as u32)));
+
+                match value
+                {
+                    Ok(_) =>
+                    {}
+                    Err(e) =>
+                    {
+                        println!("{:?}", e);
+                        process::exit(1);
+                    }
+                }
             }
         }
 

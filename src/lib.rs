@@ -19,7 +19,7 @@ fn init<'a>() -> (Renderer<'a>, EventPump)
     let sdl_context = sdl2::init().unwrap();
     let video_subsystem = sdl_context.video().unwrap();
 
-    let window = video_subsystem.window("Chipper", 400, 600)
+    let window = video_subsystem.window("Chipper", 800, 600)
         .position_centered()
         .opengl()
         .build()
@@ -38,8 +38,8 @@ fn init<'a>() -> (Renderer<'a>, EventPump)
 
 pub fn main(program: String)
 {
-    let (mut renderer, mut events) = init();
-    let mut cpu = Cpu::new(&mut renderer);
+    let (renderer, mut events) = init();
+    let mut cpu = Cpu::new(renderer);
     cpu.load_game(program);
 
 
