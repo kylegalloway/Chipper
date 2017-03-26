@@ -1,4 +1,4 @@
-use sdl2::keyboard::Keycode as Key;
+
 
 #[derive(Default, Builder, Debug)]
 pub struct Keypad
@@ -17,22 +17,24 @@ impl Keypad
     {
         match key
         {
-            Key::Num1 => self.set_key(0x1, state),
-            Key::Num2 => self.set_key(0x2, state),
-            Key::Num3 => self.set_key(0x3, state),
-            Key::Num4 => self.set_key(0xc, state),
-            Key::Q => self.set_key(0x4, state),
-            Key::W => self.set_key(0x5, state),
-            Key::E => self.set_key(0x6, state),
-            Key::R => self.set_key(0xd, state),
-            Key::A => self.set_key(0x7, state),
-            Key::S => self.set_key(0x8, state),
-            Key::D => self.set_key(0x9, state),
-            Key::F => self.set_key(0xe, state),
-            Key::Z => self.set_key(0xa, state),
-            Key::X => self.set_key(0x0, state),
-            Key::C => self.set_key(0xb, state),
-            Key::V => self.set_key(0xf, state),
+            use sdl2::keyboard::Keycode::*;
+
+            Num1 => self.set_key(0x1, state),
+            Num2 => self.set_key(0x2, state),
+            Num3 => self.set_key(0x3, state),
+            Num4 => self.set_key(0xc, state),
+            Q => self.set_key(0x4, state),
+            W => self.set_key(0x5, state),
+            E => self.set_key(0x6, state),
+            R => self.set_key(0xd, state),
+            A => self.set_key(0x7, state),
+            S => self.set_key(0x8, state),
+            D => self.set_key(0x9, state),
+            F => self.set_key(0xe, state),
+            Z => self.set_key(0xa, state),
+            X => self.set_key(0x0, state),
+            C => self.set_key(0xb, state),
+            V => self.set_key(0xf, state),
             _ => (),
         }
     }
