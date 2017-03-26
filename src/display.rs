@@ -75,10 +75,10 @@ impl<'a> Display<'a>
             {
                 pixel = if self.gfx[y][x] != 0 { 255 } else { 0 };
                 self.screen.set_draw_color(Color::RGB(pixel, pixel, pixel));
-                let value = self.screen.fill_rect(Some(Rect::new((x * SCALE) as i32,
-                                                                 (y * SCALE) as i32,
-                                                                 SCALE as u32,
-                                                                 SCALE as u32)));
+                let value = self.screen.fill_rect(Rect::new((x * SCALE) as i32,
+                                                            (y * SCALE) as i32,
+                                                            SCALE as u32,
+                                                            SCALE as u32));
 
                 match value
                 {
@@ -93,8 +93,6 @@ impl<'a> Display<'a>
             }
         }
 
-        // self.screen.flip();
-        self.screen.clear();
         self.screen.present();
         self.draw_flag = false;
     }

@@ -60,7 +60,7 @@ impl<'a> Cpu<'a>
         {
             if self.sound_timer == 1
             {
-                println!("BEEP!");
+                // println!("BEEP!");
             }
             self.sound_timer -= 1;
         }
@@ -147,6 +147,7 @@ impl<'a> Cpu<'a>
             0x0000 =>
             {
                 self.display.clear();
+                println!("Cleared display due to OpCode: {}", self.opcode);
             }
             0x000E =>
             {

@@ -19,7 +19,7 @@ fn init<'a>() -> (Renderer<'a>, EventPump)
     let sdl_context = sdl2::init().unwrap();
     let video_subsystem = sdl_context.video().unwrap();
 
-    let window = video_subsystem.window("Chipper", 800, 600)
+    let window = video_subsystem.window("Chipper", 1280, 640)
         .position_centered()
         .opengl()
         .build()
@@ -57,9 +57,8 @@ pub fn main(program: String)
                     _ => break 'event,
                 }
             }
+            cpu.emulate_cycle();
+            cpu.display.draw_screen();
         }
-
-        cpu.emulate_cycle();
-        cpu.display.draw_screen();
     }
 }
