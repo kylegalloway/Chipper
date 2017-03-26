@@ -144,11 +144,7 @@ impl<'a> Cpu<'a>
     {
         match self.opcode & 0x000F
         {
-            0x0000 =>
-            {
-                self.display.clear();
-                println!("Cleared display due to OpCode: {}", self.opcode);
-            }
+            0x0000 => self.display.clear(),
             0x000E =>
             {
                 self.sp -= 1;
@@ -173,38 +169,17 @@ impl<'a> Cpu<'a>
 
     fn op_3xxx(&mut self)
     {
-        if self.v[self.op_x()] == self.op_nn()
-        {
-            self.pc += 4;
-        }
-        else
-        {
-            self.pc += 2;
-        }
+        self.pc += if self.v[self.op_x()] == self.op_nn() { 4 } else { 2 }
     }
 
     fn op_4xxx(&mut self)
     {
-        if self.v[self.op_x()] != self.op_nn()
-        {
-            self.pc += 4;
-        }
-        else
-        {
-            self.pc += 2;
-        }
+        self.pc += if self.v[self.op_x()] != self.op_nn() { 4 } else { 2 }
     }
 
     fn op_5xxx(&mut self)
     {
-        if self.v[self.op_x()] == self.v[self.op_y()]
-        {
-            self.pc += 4;
-        }
-        else
-        {
-            self.pc += 2;
-        }
+        self.pc += if self.v[self.op_x()] == self.v[self.op_y()] { 4 } else { 2 }
     }
 
     fn op_6xxx(&mut self)
@@ -223,22 +198,10 @@ impl<'a> Cpu<'a>
     {
         match self.opcode & 0x000F
         {
-            0x0 =>
-            {
-                self.v[self.op_x()] = self.v[self.op_y()];
-            }
-            0x1 =>
-            {
-                self.v[self.op_x()] |= self.v[self.op_y()];
-            }
-            0x2 =>
-            {
-                self.v[self.op_x()] &= self.v[self.op_y()];
-            }
-            0x3 =>
-            {
-                self.v[self.op_x()] ^= self.v[self.op_y()];
-            }
+            0x0 => self.v[self.op_x()] = self.v[self.op_y()],
+            0x1 => self.v[self.op_x()] |= self.v[self.op_y()],
+            0x2 => self.v[self.op_x()] &= self.v[self.op_y()],
+            0x3 => self.v[self.op_x()] ^= self.v[self.op_y()],
             0x4 =>
             {
                 let (result, overflow) = self.v[self.op_x()].overflowing_add(self.v[self.op_y()]);
@@ -274,14 +237,7 @@ impl<'a> Cpu<'a>
 
     fn op_9xxx(&mut self)
     {
-        if self.v[self.op_x()] != self.v[self.op_y()]
-        {
-            self.pc += 4;
-        }
-        else
-        {
-            self.pc += 2;
-        }
+        self.pc += if self.v[self.op_x()] != self.v[self.op_y()] { 4 } else { 2 }
     }
 
 
@@ -329,27 +285,12 @@ impl<'a> Cpu<'a>
     {
         match self.opcode & 0x00FF
         {
-            0x07 =>
-            {
-                self.v[self.op_x()] = self.delay_timer;
-            }
-            0x0A =>
-            {
-                self.wait_for_keypress();
-            }
-            0x15 =>
-            {
-                self.delay_timer = self.v[self.op_x()];
-            }
-            0x18 =>
-            {
-                self.sound_timer = self.v[self.op_x()];
-            }
+            0x07 => self.v[self.op_x()] = self.delay_timer,
+            0x0A => self.wait_for_keypress(),
+            0x15 => self.delay_timer = self.v[self.op_x()],
+            0x18 => self.sound_timer = self.v[self.op_x()],
             0x1E => self.i += self.v[self.op_x()] as usize,
-            0x29 =>
-            {
-                self.i = self.v[self.op_x()] as usize * 5;
-            }
+            0x29 => self.i = self.v[self.op_x()] as usize * 5,
             0x33 =>
             {
                 self.memory[self.i] = self.v[self.op_x()] / 100;
@@ -384,21 +325,25 @@ impl<'a> Cpu<'a>
     {
         ((self.opcode & 0x0F00) >> 8) as usize
     }
+
     // returns the y part of an opcode
     fn op_y(&self) -> usize
     {
         ((self.opcode & 0x00F0) >> 4) as usize
     }
+
     // returns the n part of an opcode
     fn op_n(&self) -> u8
     {
         (self.opcode & 0x000F) as u8
     }
+
     // returns the nn part of an opcode
     fn op_nn(&self) -> u8
     {
         (self.opcode & 0x00FF) as u8
     }
+
     // returns the nnn part of an opcode
     fn op_nnn(&self) -> u16
     {
