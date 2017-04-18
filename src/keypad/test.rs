@@ -1,10 +1,8 @@
-use super::Keypad;
 
 #[cfg(test)]
 mod test {
-    use super::*;
+    use super::super::*;
     use sdl2::keyboard::Keycode;
-    use sdl2::keyboard::Keycode::*;
 
     #[test]
     fn test_default()
