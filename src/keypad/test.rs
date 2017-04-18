@@ -1,4 +1,3 @@
-
 #[cfg(test)]
 mod test {
     use super::super::*;
@@ -8,6 +7,7 @@ mod test {
     fn test_default()
     {
         let mut keypad = Keypad::default();
+        // Ordered based on order in file
         let keys: [Keycode; 16] = [X, Num1, Num2, Num3, Q, W, E, A, S, D, Z, C, Num4, R, F, V];
 
         for i in 0..keys.len()
@@ -20,6 +20,7 @@ mod test {
     fn test_pressing_keys()
     {
         let mut keypad = Keypad::default();
+        // Ordered based on order in file
         let keys: [Keycode; 16] = [X, Num1, Num2, Num3, Q, W, E, A, S, D, Z, C, Num4, R, F, V];
 
         for i in 0..keys.len()
