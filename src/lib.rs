@@ -1,9 +1,6 @@
 extern crate rand;
 extern crate sdl2;
 
-#[macro_use]
-extern crate derive_builder;
-
 use cpu::Cpu;
 use sdl2::EventPump;
 use sdl2::event::Event;

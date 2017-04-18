@@ -3,7 +3,7 @@ use sdl2::keyboard::Keycode::*;
 
 mod test;
 
-#[derive(Default, Builder, Debug)]
+#[derive(Default, Debug)]
 pub struct Keypad
 {
     keys: [bool; 16],
