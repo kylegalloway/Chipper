@@ -32,4 +32,19 @@ mod test {
             assert_eq!(keypad.pressed(i), false);
         }
     }
+
+    #[test]
+    fn test_set_key()
+    {
+        let mut keypad = Keypad::default();
+
+        for i in 0..16 // Because I know then length of Keypad::keys()
+        {
+            keypad.set_key(i, true);
+            assert!(keypad.pressed(i));
+            
+            keypad.set_key(i, false);
+            assert_eq!(keypad.pressed(i), false);
+        }
+    }
 }
