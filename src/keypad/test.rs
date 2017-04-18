@@ -1,27 +1,36 @@
-//! Tests for keypad
+use super::Keypad;
 
-extern crate chipper;
-extern crate sdl2;
+#[cfg(test)]
+mod test {
+    use super::*;
+    use sdl2::keyboard::Keycode;
+    use sdl2::keyboard::Keycode::*;
 
-use chipper::keypad::Keypad;
-use sdl2::keyboard::Keycode as Key;
-
-#[test]
-fn test_pressing_keys()
-{
-    let mut keypad = Keypad::default();
-    let keys: [Key; 16] = [Key::X, Key::Num1, Key::Num2, Key::Num3, Key::Q, Key::W, Key::E,
-                           Key::A, Key::S, Key::D, Key::Z, Key::C, Key::Num4, Key::R, Key::F,
-                           Key::V];
-
-    for i in 0..keys.len()
+    #[test]
+    fn test_default()
     {
-        assert_eq!(keypad.pressed(i), false);
-        keypad.press(keys[i], true);
-        println!("i: {}", i);
-        println!("pressed: {}", keypad.pressed(i));
-        assert!(keypad.pressed(i));
-        keypad.press(keys[i], false);
-        assert_eq!(keypad.pressed(i), false);
+        let mut keypad = Keypad::default();
+        let keys: [Keycode; 16] = [X, Num1, Num2, Num3, Q, W, E, A, S, D, Z, C, Num4, R, F, V];
+
+        for i in 0..keys.len()
+        {
+            assert_eq!(keypad.pressed(i), false);
+        }
+    }
+
+    #[test]
+    fn test_pressing_keys()
+    {
+        let mut keypad = Keypad::default();
+        let keys: [Keycode; 16] = [X, Num1, Num2, Num3, Q, W, E, A, S, D, Z, C, Num4, R, F, V];
+
+        for i in 0..keys.len()
+        {
+            keypad.press(keys[i], true);
+            assert!(keypad.pressed(i));
+            
+            keypad.press(keys[i], false);
+            assert_eq!(keypad.pressed(i), false);
+        }
     }
 }
