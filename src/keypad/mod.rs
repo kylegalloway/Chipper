@@ -1,4 +1,5 @@
-
+use sdl2::keyboard::Keycode;
+use sdl2::keyboard::Keycode::*;
 
 #[derive(Default, Builder, Debug)]
 pub struct Keypad
@@ -13,12 +14,10 @@ impl Keypad
         self.keys[index]
     }
 
-    pub fn press(&mut self, key: Key, state: bool)
+    pub fn press(&mut self, key: Keycode, state: bool)
     {
         match key
         {
-            use sdl2::keyboard::Keycode::*;
-
             Num1 => self.set_key(0x1, state),
             Num2 => self.set_key(0x2, state),
             Num3 => self.set_key(0x3, state),
