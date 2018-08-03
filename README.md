@@ -14,3 +14,11 @@ Lastly, I converted it to use sdl2 instead of sdl.
 
 * Rust
 * sdl2 library
+
+## Usage Instructions
+
+```sh
+cargo build
+
+cargo run <program>
+```
